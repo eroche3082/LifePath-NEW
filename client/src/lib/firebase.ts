@@ -1,46 +1,47 @@
-// Firebase client-side configuration and initialization
-import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut } from "firebase/auth";
-import { getAnalytics } from "firebase/analytics";
+import { initializeApp, FirebaseApp } from "firebase/app";
+import { getAuth, Auth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut } from "firebase/auth";
 
-// Firebase configuration using environment variables
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
-  messagingSenderId: "717009294667",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: "G-5TH0DG8YFR"
-};
+const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
+const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID;
+const appId = import.meta.env.VITE_FIREBASE_APP_ID;
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+export const isFirebaseConfigured = !!(apiKey && projectId && appId);
 
-// Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(app);
+let app: FirebaseApp | null = null;
+let auth: Auth | null = null;
+let googleProvider: GoogleAuthProvider | null = null;
 
-// Initialize Analytics (optional)
-export const analytics = getAnalytics(app);
+if (isFirebaseConfigured) {
+  const firebaseConfig = {
+    apiKey,
+    authDomain: `${projectId}.firebaseapp.com`,
+    projectId,
+    storageBucket: `${projectId}.firebasestorage.app`,
+    messagingSenderId: "717009294667",
+    appId,
+    measurementId: "G-5TH0DG8YFR"
+  };
 
-// Google Auth Provider
-export const googleProvider = new GoogleAuthProvider();
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  googleProvider = new GoogleAuthProvider();
+  googleProvider.setCustomParameters({ prompt: 'select_account' });
+}
 
-// Configure Google Auth Provider
-googleProvider.setCustomParameters({
-  prompt: 'select_account'
-});
+export { auth, googleProvider };
 
-// Authentication functions
 export const signInWithGoogle = () => {
+  if (!auth || !googleProvider) throw new Error("Firebase is not configured");
   return signInWithRedirect(auth, googleProvider);
 };
 
 export const handleGoogleRedirect = () => {
+  if (!auth) return Promise.resolve(null);
   return getRedirectResult(auth);
 };
 
 export const signOutUser = () => {
+  if (!auth) return Promise.resolve();
   return signOut(auth);
 };
 
