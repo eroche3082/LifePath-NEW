@@ -1,0 +1,136 @@
+**MEGAPROMPT – LIFE PATH (P.A.P.H.)**
+
+**Name:** LIFE PATH (Life Performance Alignment Platform & Hub)
+**Alias:** P.A.P.H. — Physical, Emotional, Intellectual, Spiritual, and Relational Harmony System
+
+**OBJECTIVE:**
+Create an intelligent and immersive personal life tracking system named **LIFE PATH**, designed to help users align their entire being—physically, emotionally, intellectually, spiritually, and relationally. This app connects holistic self-development with AI-powered dashboards, tracking systems, and guided daily rituals.
+
+LIFE PATH is more than a journal or a goal tracker. It is a complete **Life Alignment Platform** powered by **Gemini 1.5 / 2.5 Pro** and **Vertex AI**, connected with real-time data, personalized prompts, consultation modes, and a spiritual AI assistant.
+
+---
+
+**TECH STACK:**
+- **Frontend:** React + TailwindCSS + ShadCN/UI
+- **Backend:** Node.js + Express
+- **Database:** PostgreSQL (Drizzle ORM)
+- **AI Models:** Vertex AI 2.5 Pro + Gemini 1.5 / 2.5
+- **Integrations:** Google Calendar, Gmail, YouTube (spiritual content), Firebase, Google Cloud APIs (TTS, STT, Sentiment, Translate)
+- **Voice AI:** ElevenLabs or Cloud TTS/STT
+- **Deployment:** Firebase Hosting + Firestore
+
+---
+
+**DASHBOARD STRUCTURE (6 TABS):**
+
+1. **Home – Daily Alignment Hub**
+   - Greeting from the AI guide
+   - Daily mantra or message
+   - “Life Balance Wheel” snapshot
+   - Suggestion for one area to work on today
+
+2. **Trackers (The 5 P.A.P.H. Dimensions)**
+   - **Physical:** Habits, sleep, water, food, exercise
+   - **Emotional:** Mood check-ins, stress levels, venting voice memos
+   - **Intellectual:** Learning goals, reading log, reflection journal
+   - **Spiritual:** Meditation, prayer log, synchronicities, dreams
+   - **Relational:** Relationships, gratitude, boundaries, social balance
+
+   *Each dimension has its own subtab, progress tracker, chart, and AI feedback system.*
+
+3. **Guided Consultations**
+   - Choose: Physical / Emotional / Intellectual / Spiritual / Relational
+   - Open-ended reflection with AI support
+   - Gemini prompts + suggestions + visualizations
+   - Custom rituals, breathing, exercises
+   - Audio + video guided sessions (YouTube integrations)
+
+4. **Goals & Rituals**
+   - Short-term / long-term goals across dimensions
+   - Daily/Weekly ritual planner
+   - Progress rings + reward system
+   - Sync with calendar (reminders, sessions, sessions logged)
+
+5. **Archive & Timeline**
+   - Timeline of self-growth: entries, breakthroughs, emotional states
+   - Searchable emotional tags
+   - Journaling archive with TTS (can listen to past entries)
+
+6. **Settings & Sync**
+   - AI tuning: tone, gender, spiritual style (neutral / divine / stoic / intuitive)
+   - Language toggle ENG/ESP
+   - Backup to Google Drive
+   - API integration manager
+
+---
+
+**FEATURES (30 ACTIVATED)**
+1. 5D Tracker Engine (P.A.P.H.)
+2. Smart AI Daily Prompts
+3. Sentiment Analysis AI
+4. Spiritual AI Consultation (based on user profile)
+5. Emotional Audio Diary (STT/voice journaling)
+6. Goal Visualization Dashboard
+7. Daily Ritual Generator
+8. Meditation Video Feed (YouTube API)
+9. AI Mood Forecasting
+10. Relational Energy Balance Meter
+11. Sleep & Nutrition Logger
+12. TTS Journaling Playback
+13. Dream Journal + Pattern Recognition
+14. Community Reflection Board (optional)
+15. Personalized Quotes + Mantras
+16. Multi-language Guidance
+17. Guided Breathwork Timer
+18. Calendar Sync for Rituals
+19. Periodic AI Check-Ins
+20. Archive Search Engine
+21. Growth Timeline Generator
+22. Physical Progress Overlay (water, steps, heart rate*)
+23. Real-time Affirmations Generator
+24. Avatar-Driven Visual Coach (optional link with Avatar Studios)
+25. Gratitude Wall
+26. Sacred Space Creator (custom spiritual zone)
+27. Voice Note Feedback from AI
+28. Gemini-Guided Story Journaling
+29. Chakra or Zone Tracking (optional plugin)
+30. Integration with other apps (EduAI, Skylith, Vitra)
+
+---
+
+**AI AGENT TONE & ROLE:**
+- Acts like a **sacred life companion** — wise, calm, intuitive
+- Offers gentle suggestions
+- Speaks in a soothing tone (ElevenLabs integration optional)
+- Can be customized for spiritual paths (neutral, mystical, psychological)
+
+---
+
+**USER JOURNEY FLOW:**
+1. Create account → Choose primary growth focus
+2. Select daily rituals → Set goals
+3. Begin daily reflections and AI-guided alignment
+4. Track progress in 5 dimensions
+5. Get reports every week or month
+6. Archive, adjust, and celebrate breakthroughs
+
+---
+
+**DESIGN STYLE:**
+- Visual vibe: calming, cosmic, minimal
+- Colors: Deep indigo, soft gold, gentle emerald
+- Fonts: Inter, Urbanist
+- Transitions: Soft fade-ins, slow UI animations
+
+---
+
+**FINAL NOTE TO AGENT:**
+Build Life Path as a **life transformation dashboard**—something between a journal, a personal coach, and a sacred digital temple. Prioritize inner balance, clarity, rhythm, and soulful progress. Everything must be integrated, trackable, and visually resonant with deep alignment. Connect it with other agents for future ecosystem expansion.
+
+Activate in full structure with 5D trackers, consultations, audio journaling, and rituals engine now.
+
+This is the sanctuary of the user.
+Let Life Path awaken the multidimensional self.
+
+**Begin now.**
+
