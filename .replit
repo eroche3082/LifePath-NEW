@@ -39,3 +39,7 @@ waitForPort = 5000
 integrations = ["firebase_barebones_javascript:1.0.0"]
 stack = "FULLSTACK_JS"
 expertMode = true
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
