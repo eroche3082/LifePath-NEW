@@ -10,34 +10,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // -------------------- API Routes --------------------
   
-  // Test route for Gemini API
-  app.get("/api/test-gemini", async (req, res) => {
-    try {
-      const quote = await generateDailyQuote();
-      const welcomeMessage = await generatePersonalizedContent("TestUser", "welcome");
-      const consultationResponse = await generateAIResponse(
-        "How can I improve my wellbeing?", 
-        "physical", 
-        "TestUser"
-      );
-      
-      res.json({ 
-        success: true, 
-        quote,
-        welcomeMessage,
-        consultationResponse,
-        message: "Gemini API is working correctly on all features"
-      });
-    } catch (error) {
-      console.error("Gemini API test error:", error);
-      res.status(500).json({ 
-        success: false, 
-        message: "Failed to test Gemini API", 
-        error: error.message 
-      });
-    }
-  });
-
   // Dashboard Data
   app.get("/api/dashboard", async (req, res) => {
     if (!req.isAuthenticated()) return res.status(401).json({ message: "Not authenticated" });
