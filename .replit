@@ -38,3 +38,4 @@ waitForPort = 5000
 [agent]
 integrations = ["firebase_barebones_javascript:1.0.0"]
 stack = "FULLSTACK_JS"
+expertMode = true
