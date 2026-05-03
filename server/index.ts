@@ -25,7 +25,13 @@ app.use((req, res, next) => {
     if (path.startsWith("/api")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        const authPaths = ["/api/login", "/api/register", "/api/user", "/api/auth/firebase"];
+        const isAuthPath = authPaths.some(p => path === p);
+        if (isAuthPath) {
+          logLine += ` :: [response body redacted]`;
+        } else {
+          logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        }
       }
 
       if (logLine.length > 80) {

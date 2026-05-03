@@ -4,6 +4,7 @@ import { Express } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
+import { rateLimit } from "express-rate-limit";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
 import { verifyIdToken, isFirebaseAdminInitialized } from "./firebase-admin";
@@ -29,6 +30,19 @@ async function comparePasswords(supplied: string, stored: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
+function sanitizeUser(user: SelectUser): Omit<SelectUser, "password"> {
+  const { password: _password, ...safeUser } = user;
+  return safeUser;
+}
+
+const authRateLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again later." },
+});
+
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "lifepath_secret_key",
@@ -36,7 +50,7 @@ export function setupAuth(app: Express) {
     saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      maxAge: 1000 * 60 * 60 * 24 * 7,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax"
     }
@@ -54,17 +68,11 @@ export function setupAuth(app: Express) {
         if (!user) {
           return done(null, false);
         }
-        
-        // Special case for admin user with non-hashed password
-        if (username === "admin" && password === user.password) {
-          return done(null, user);
-        }
-        
-        // For regular users, use password comparison
+
         if (!(await comparePasswords(password, user.password))) {
           return done(null, false);
         }
-        
+
         return done(null, user);
       } catch (error) {
         return done(error);
@@ -82,7 +90,7 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/register", async (req, res, next) => {
+  app.post("/api/register", authRateLimit, async (req, res, next) => {
     try {
       const existingUser = await storage.getUserByUsername(req.body.username);
       if (existingUser) {
@@ -96,19 +104,18 @@ export function setupAuth(app: Express) {
 
       req.login(user, (err) => {
         if (err) return next(err);
-        
-        // Initialize user data
+
         storage.initializeUserData(user.id);
-        
-        res.status(201).json(user);
+
+        res.status(201).json(sanitizeUser(user));
       });
     } catch (error) {
       next(error);
     }
   });
 
-  app.post("/api/login", passport.authenticate("local"), (req, res) => {
-    res.status(200).json(req.user);
+  app.post("/api/login", authRateLimit, passport.authenticate("local"), (req, res) => {
+    res.status(200).json(sanitizeUser(req.user as SelectUser));
   });
 
   app.post("/api/logout", (req, res, next) => {
@@ -120,66 +127,59 @@ export function setupAuth(app: Express) {
 
   app.get("/api/user", (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    res.json(req.user);
+    res.json(sanitizeUser(req.user as SelectUser));
   });
 
-  // Firebase authentication endpoint
-  app.post("/api/auth/firebase", async (req, res, next) => {
+  app.post("/api/auth/firebase", authRateLimit, async (req, res, next) => {
     try {
-      // Check if Firebase Admin is available
       if (!isFirebaseAdminInitialized) {
         return res.status(503).json({ error: "Firebase authentication is not available" });
       }
 
       const { idToken } = req.body;
-      
+
       if (!idToken) {
         return res.status(400).json({ error: "ID token is required" });
       }
 
-      // Verify the Firebase ID token
       const decodedToken = await verifyIdToken(idToken);
       const { uid, email, name, picture } = decodedToken;
 
-      // Check if user already exists in our database
-      let user = await storage.getUserByUsername(email || uid);
-      
+      let user = await storage.getUserByFirebaseUid(uid);
+
       if (!user) {
-        // Create new user from Firebase auth data
+        const existingByUsername = await storage.getUserByUsername(email || uid);
+        if (existingByUsername) {
+          return res.status(409).json({
+            error: "An account with this email already exists. Please sign in with your password instead.",
+          });
+        }
+
         user = await storage.createUser({
           username: email || uid,
           email: email || '',
           name: name || email || uid,
           firebaseUid: uid,
           profilePicture: picture || null,
-          password: '' // No password needed for Firebase users
+          password: ''
         });
-        
-        // Initialize user data
+
         await storage.initializeUserData(user.id);
-      } else {
-        // Update existing user with Firebase UID if not set
-        if (!user.firebaseUid) {
-          await storage.updateUser(user.id, { firebaseUid: uid });
-          user.firebaseUid = uid;
-        }
       }
 
-      // Log the user in
       req.login(user, (err) => {
         if (err) return next(err);
-        res.status(200).json(user);
+        res.status(200).json(sanitizeUser(user as SelectUser));
       });
-      
+
     } catch (error) {
       console.error("Firebase authentication error:", error);
       res.status(401).json({ error: "Invalid Firebase token" });
     }
   });
 
-  // Firebase status endpoint
   app.get("/api/firebase/status", (req, res) => {
-    res.json({ 
+    res.json({
       available: isFirebaseAdminInitialized,
       message: isFirebaseAdminInitialized ? "Firebase is ready" : "Firebase Admin SDK is not initialized"
     });

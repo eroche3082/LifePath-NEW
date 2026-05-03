@@ -119,6 +119,7 @@ export const preferences = pgTable("preferences", {
 // Export types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type SafeUser = Omit<User, "password">;
 export type CheckIn = typeof checkIns.$inferSelect;
 export type DimensionTracker = typeof dimensionTracker.$inferSelect;
 export type Tracker = typeof trackers.$inferSelect;
