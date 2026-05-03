@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { eq, and, like, desc, or, ne, SQL, sql } from "drizzle-orm";
+import { eq, and, like, desc, or, isNotNull, SQL, sql } from "drizzle-orm";
 import { 
   users, checkIns, dimensionTracker, trackers, goals, 
   rituals, journals, preferences,
@@ -179,7 +179,7 @@ export class DatabaseStorage implements IStorage {
     
     return {
       ...data,
-      trackers: dimensionTrackers.reduce((acc, tracker) => {
+      trackers: dimensionTrackers.reduce((acc: Record<string, any>, tracker) => {
         acc[tracker.name] = {
           value: tracker.value,
           timestamp: tracker.updatedAt
@@ -293,7 +293,7 @@ export class DatabaseStorage implements IStorage {
     if (!goal) return;
     
     // Update the step in the steps array
-    const updatedSteps = [...goal.steps];
+    const updatedSteps = [...(goal.steps as any[])];
     const stepIndex = updatedSteps.findIndex(s => s.id === stepId);
     
     if (stepIndex !== -1) {
@@ -381,14 +381,12 @@ export class DatabaseStorage implements IStorage {
   // Archive methods
   async getArchiveData(userId: number, type: string, searchQuery: string): Promise<any> {
     // Get journals
-    let journalQuery = db
-      .select()
-      .from(journals)
-      .where(eq(journals.userId, userId));
+    let whereCondition: SQL | undefined = eq(journals.userId, userId);
     
     // Add search filter if provided
     if (searchQuery) {
-      journalQuery = journalQuery.where(
+      whereCondition = and(
+        whereCondition,
         or(
           like(journals.title, `%${searchQuery}%`),
           like(journals.content, `%${searchQuery}%`)
@@ -396,7 +394,11 @@ export class DatabaseStorage implements IStorage {
       );
     }
     
-    const journalEntries = await journalQuery.orderBy(desc(journals.createdAt));
+    const journalEntries = await db
+      .select()
+      .from(journals)
+      .where(whereCondition)
+      .orderBy(desc(journals.createdAt));
     
     // Format for timeline or journal view
     if (type === "timeline") {
@@ -407,7 +409,7 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             eq(checkIns.userId, userId),
-            ne(checkIns.reflection, null)
+            isNotNull(checkIns.reflection)
           )
         )
         .orderBy(desc(checkIns.createdAt));
@@ -418,7 +420,7 @@ export class DatabaseStorage implements IStorage {
           id: `journal_${journal.id}`,
           title: journal.title,
           content: journal.content,
-          date: journal.createdAt.toLocaleDateString(),
+          date: journal.createdAt?.toLocaleDateString() ?? '',
           dimension: journal.dimension,
           type: journal.type,
           emotions: journal.emotions,
@@ -426,12 +428,12 @@ export class DatabaseStorage implements IStorage {
         })),
         ...checkInEntries.map(checkIn => ({
           id: `checkin_${checkIn.id}`,
-          title: `Mood: ${getMoodLabel(checkIn.mood)}`,
+          title: `Mood: ${getMoodLabel(checkIn.mood ?? 0)}`,
           content: checkIn.reflection,
-          date: checkIn.createdAt.toLocaleDateString(),
+          date: checkIn.createdAt?.toLocaleDateString() ?? '',
           dimension: "emotional",
           type: "check-in",
-          emotions: [getMoodLabel(checkIn.mood).toLowerCase()]
+          emotions: [getMoodLabel(checkIn.mood ?? 0).toLowerCase()]
         }))
       ];
       
@@ -445,7 +447,7 @@ export class DatabaseStorage implements IStorage {
         id: journal.id,
         title: journal.title,
         excerpt: journal.content.substring(0, 120) + (journal.content.length > 120 ? "..." : ""),
-        date: journal.createdAt.toLocaleDateString(),
+        date: journal.createdAt?.toLocaleDateString() ?? '',
         dimensions: [journal.dimension],
         audioRecording: journal.audioRecording
       }));
@@ -509,10 +511,3 @@ function getMoodLabel(moodValue: number): string {
   }
 }
 
-function or(...conditions: any[]): any {
-  return { type: 'or', conditions };
-}
-
-function ne(column: any, value: any): any {
-  return { type: 'not', condition: eq(column, value) };
-}

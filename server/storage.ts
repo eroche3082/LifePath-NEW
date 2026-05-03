@@ -10,7 +10,7 @@ export interface IStorage {
   getUserByFirebaseUid(firebaseUid: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User>;
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
   
   // Dashboard
   getDashboard(userId: number): Promise<any>;
@@ -58,7 +58,7 @@ export class MemStorage implements IStorage {
   private journals: Map<number, any[]>;
   private preferences: Map<number, any>;
   currentId: number;
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
 
   constructor() {
     this.users = new Map();
@@ -88,6 +88,10 @@ export class MemStorage implements IStorage {
         id: this.currentId++,
         username: "admin",
         password: "password123",
+        name: null,
+        email: null,
+        firebaseUid: null,
+        profilePicture: null,
         createdAt: new Date()
       };
       this.users.set(adminUser.id, adminUser);
@@ -118,7 +122,7 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentId++;
-    const user: User = { ...insertUser, id, createdAt: new Date() };
+    const user: User = { name: null, email: null, firebaseUid: null, profilePicture: null, ...insertUser, id, createdAt: new Date() };
     this.users.set(id, user);
     return user;
   }
@@ -248,13 +252,13 @@ export class MemStorage implements IStorage {
       
       // Update next step if applicable
       if (goal.steps && goal.steps.length > 0) {
-        const completedStep = goal.steps.find(s => s.id === step);
+        const completedStep = goal.steps.find((s: any) => s.id === step);
         if (completedStep) {
           completedStep.completed = true;
         }
         
         // Find next incomplete step
-        const nextStep = goal.steps.find(s => !s.completed);
+        const nextStep = goal.steps.find((s: any) => !s.completed);
         goal.nextStep = nextStep ? nextStep.description : null;
         goal.nextStepId = nextStep ? nextStep.id : null;
       }
